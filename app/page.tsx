@@ -1,4 +1,4 @@
-import { Button } from "@/components/ui/button"
+ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Bike, Clock, Shield, Users, ArrowRight, Package, Zap } from "lucide-react"
 
@@ -260,12 +260,12 @@ export default function Home() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>contato@buscarexpress.com</li>
                 <li>(11) 99999-9999</li>
-                <li>Seg - Sex: 8h às 18h</li>
+                <li>Seg - Sex: 9h às 17h30</li>
               </ul>
             </div>
           </div>
           <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            © 2025 BUSCAR EXPRESS. Todos os direitos reservados.
+            © 1999 BUSCAR EXPRESS. Todos os direitos reservados.
           </div>
         </div>
       </footer>
