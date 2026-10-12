@@ -125,3 +125,123 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * OSSALA | Controle de Entregas — identidade visual oficial.
+ * Aplicada somente dentro do aplicativo (/app), sem alterar a landing page.
+ * ------------------------------------------------------------------------- */
+.ossala {
+  --ossala-bordo: #800020;
+  --ossala-bordo-escuro: #4a0012;
+  --ossala-dourado: #d4af37;
+  --ossala-dourado-claro: #e8c98e;
+  --ossala-dourado-secundario: #b48a4a;
+  --ossala-fundo-login: #100b0d;
+  --ossala-fundo: #0b0b0b;
+
+  --background: #0b0b0b;
+  --foreground: #f3eee6;
+  --card: #141012;
+  --card-foreground: #f3eee6;
+  --popover: #171214;
+  --popover-foreground: #f3eee6;
+  --primary: #800020;
+  --primary-foreground: #fdf7ea;
+  --secondary: #2a1d20;
+  --secondary-foreground: #e8c98e;
+  --muted: #1e1719;
+  --muted-foreground: #b3a79c;
+  --accent: #2a1d20;
+  --accent-foreground: #e8c98e;
+  --destructive: #b91c1c;
+  --destructive-foreground: #fecaca;
+  --border: #2e2427;
+  --input: #3a2e31;
+  --ring: #d4af37;
+  --chart-1: #800020;
+  --chart-2: #d4af37;
+  --chart-3: #b48a4a;
+  --chart-4: #e8c98e;
+  --chart-5: #4a0012;
+  --sidebar: #100b0d;
+  --sidebar-foreground: #f3eee6;
+  --sidebar-primary: #d4af37;
+  --sidebar-primary-foreground: #100b0d;
+  --sidebar-accent: #241a1d;
+  --sidebar-accent-foreground: #e8c98e;
+  --sidebar-border: #2e2427;
+  --sidebar-ring: #d4af37;
+  color-scheme: dark;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+.ossala .bg-ossala-gradient {
+  background-image: linear-gradient(135deg, #800020 0%, #4a0012 100%);
+}
+
+.ossala .text-gold {
+  color: #d4af37;
+}
+
+/* Marcadores do mapa (identificadores mantidos por compatibilidade). */
+.ossala-store-marker,
+.ossala-area-marker,
+.ossala-manual-marker {
+  background: transparent;
+  border: none;
+}
+
+.ossala-store-marker .pin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 9999px;
+  background: #800020;
+  color: #d4af37;
+  border: 2px solid #d4af37;
+  font-weight: 800;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.ossala-area-marker .pin {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px 9999px 9999px 0;
+  transform: rotate(-45deg);
+  border: 2px solid #0b0b0b;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+.ossala-manual-marker .pin {
+  width: 20px;
+  height: 20px;
+  transform: rotate(45deg);
+  background: #e8c98e;
+  border: 2px solid #4a0012;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+.leaflet-container {
+  font-family: inherit;
+  background: #1a1416;
+}
+
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+  background: #171214;
+  color: #f3eee6;
+  border: 1px solid #2e2427;
+}
+
+.leaflet-popup-content {
+  margin: 10px 12px;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
