@@ -3,7 +3,7 @@
 ## Como executar
 
 ```bash
-pnpm test        # 60 testes: unitários + banco
+pnpm test        # 61 testes: unitários + banco
 pnpm typecheck
 pnpm build
 ```
@@ -18,7 +18,7 @@ pnpm build
 | Suíte | Resultado |
 | --- | --- |
 | `tests/db/smoke.test.ts` | 1/1 ✅ |
-| `tests/db/business.test.ts` | 37/37 ✅ |
+| `tests/db/business.test.ts` | 38/38 ✅ |
 | `tests/db/manual-sql.test.ts` (arquivo do SQL Editor sobre o estado da produção, executado duas vezes) | 2/2 ✅ |
 | `tests/unit/*` | 20/20 ✅ |
 | `tsc --noEmit` | sem erros |
@@ -26,6 +26,7 @@ pnpm build
 | Servidor de produção local | redirecionamentos, login, manifest, ícones, service worker, 401 em APIs sem sessão ✅ |
 | Tela de login (Chromium, 390 px e 1280 px) | digitar a matrícula mantém o foco no campo ✅ |
 | Produção (Supabase, transação desfeita) | admin: contexto, 44 permissões, painel e alertas ✅ · motoboy: só o próprio perfil e as próprias entregas ✅ |
+| Produção, após 0007/0850/0930 | políticas antigas removidas · motoboy pode confirmar entrega e não pode cadastrar · admin gera fechamento da quinzena (teste desfeito) · endereços legados visíveis só para a própria empresa ✅ |
 
 ## Checklist dos 24 cenários obrigatórios
 
@@ -47,11 +48,11 @@ Legenda: **A** = automatizado (teste no repositório) · **M** = verificado manu
 | 12 | Falhas de OCR tratadas | A: falha gera notificação real · código: status `falha_ocr`, mensagem, nova tentativa, conferência manual | ✅ |
 | 13 | Relatórios com os mesmos totais dos registros | A: soma dos grupos = total geral; fechamento = soma da visão | ✅ |
 | 14 | PDFs legíveis e em A4 | A: 210×297 mm, várias páginas, cabeçalho repetido | ✅ |
-| 15 | Fechamento quinzenal consolida corretamente | A | ✅ banco · P produção (migration 0007 pendente) |
-| 16 | Fechamento encerrado bloqueia alterações comuns | A: bloqueio de inserir/alterar; correção autorizada com justificativa auditada; reabertura com permissão | ✅ banco · P produção |
+| 15 | Fechamento quinzenal consolida corretamente | A · M: geração em produção (transação desfeita) | ✅ |
+| 16 | Fechamento encerrado bloqueia alterações comuns | A: bloqueio de inserir/alterar; correção autorizada com justificativa auditada; reabertura com permissão | ✅ banco · gatilhos de bloqueio ativos em produção |
 | 17 | Notificações por eventos reais | A: atribuição, divergência, falha de OCR, pagamento, fechamento · pg_cron para pendências | ✅ |
 | 18 | Sem permissão não executa operações restritas | A: RLS + funções recusam (`42501`) · M: APIs respondem 401/403 | ✅ |
-| 19 | Empresa não acessa dados de outra | A: leitura, alteração e `company_id` forjado | ✅ banco · P produção (migration 0850 pendente para tabelas legadas) |
+| 19 | Empresa não acessa dados de outra | A: leitura, alteração e `company_id` forjado, inclusive na tabela legada de endereços manuais | ✅ |
 | 20 | Funciona em celular e computador | M: login em 390 px e 1280 px · layout com navegação inferior/menu lateral | ✅ parcial |
 | 21 | Dados persistem após recarregar | Todos os dados vêm do banco (sem estado local) | ✅ por construção |
 | 22 | Falha de rede não perde dados silenciosamente | Ações recusam o envio sem conexão, com aviso; formulários mantêm o conteúdo; aviso global offline | ✅ por construção |
@@ -64,7 +65,6 @@ Legenda: **A** = automatizado (teste no repositório) · **M** = verificado manu
   desenvolvimento. Por isso o fluxo ponta a ponta com login real, mapa e upload de foto não foi exercitado aqui. As
   mesmas regras foram validadas no Postgres local com as migrations reais.
 - **OCR real** não foi chamado por falta de `ANTHROPIC_API_KEY` neste ambiente.
-- **Migrations 0007 e 0850** dependem de aprovação manual no SQL Editor (ver README).
 
 ## Roteiro de aceite no ambiente real (após configurar as variáveis)
 

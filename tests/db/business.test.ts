@@ -380,6 +380,18 @@ describe("isolamento multiempresa", () => {
     expect(row.company_id).toBe(C2)
   })
 
+  test("tabela legada de endereços manuais: a empresa lê e altera, outra empresa não", async () => {
+    const [row] = await asAdmin<{ id: string }>(db,
+      `insert into public.manual_delivery_addresses (motoboy_id, endereco, cidade, estado, latitude, longitude)
+       values ($1, 'Rua Legada', 'Cidade', 'SP', -23.5, -46.6) returning id`, [MOTO1])
+    expect(await asUser(db, GESTOR, `select id from public.manual_delivery_addresses where id = $1`, [row.id])).toHaveLength(1)
+    expect(await asUser(db, OTHER_ADMIN, `select id from public.manual_delivery_addresses where id = $1`, [row.id])).toHaveLength(0)
+    expect(await asUser(db, OTHER_ADMIN, `update public.manual_delivery_addresses set endereco = 'x' where id = $1 returning id`, [row.id])).toHaveLength(0)
+    expect(await asUser(db, MOTO2, `update public.manual_delivery_addresses set endereco = 'x' where id = $1 returning id`, [row.id])).toHaveLength(0)
+    expect(await asUser(db, GESTOR, `update public.manual_delivery_addresses set endereco = 'Rua Corrigida' where id = $1 returning id`, [row.id])).toHaveLength(1)
+    expect(await asUser(db, MOTO1, `update public.manual_delivery_addresses set endereco = 'Rua Legada' where id = $1 returning id`, [row.id])).toHaveLength(1)
+  })
+
   test("anônimo não acessa nada", async () => {
     await expectError(asUser(db, null, `select * from public.deliveries`), /permission denied/)
   })

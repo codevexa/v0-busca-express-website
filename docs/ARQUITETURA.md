@@ -111,7 +111,7 @@ Valores monetários: `numeric(12,2)`. Datas de negócio: `date` + `time` no fuso
 | 3 · Consulta | Hoje (indicadores do banco + tempo real), histórico, calendário, filtros | ✅ |
 | 4 · Mapa | OSM/Leaflet, Nominatim com cache, marcadores, filtros, endereços manuais, correção por arraste, loja configurável | ✅ |
 | 5 · Conferência | Câmera/galeria, Storage privado, OCR, comparação, aprovação manual, nova tentativa | ✅ |
-| 6 · Financeiro | 10 relatórios em PDF A4, fechamento quinzenal com fluxo completo e bloqueio | ✅ (fechamento depende da migration 0007) |
+| 6 · Financeiro | 10 relatórios em PDF A4, fechamento quinzenal com fluxo completo e bloqueio | ✅ |
 | 7 · Administração | Notificações por evento real, auditoria, configurações, multiempresa | ✅ |
 | 8 · Finalização | PWA, responsividade, testes, documentação | ✅ |
 

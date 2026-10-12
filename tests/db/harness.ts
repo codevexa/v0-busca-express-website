@@ -74,6 +74,20 @@ alter table public.user_permissions add constraint user_permissions_permission_k
 insert into public.role_permissions values ('MOTOBOY','entregas.criar'),('MOTOBOY','teles.visualizar'),('ADMIN','entregas.visualizar');
 alter table public.delivery_areas add constraint delivery_areas_name_check
   check (name = any (array['Área 1','Área 2','Área 3','Área Especial']));
+create table public.manual_delivery_addresses (
+  id uuid primary key default gen_random_uuid(),
+  motoboy_id uuid not null references public.profiles(id) on delete cascade,
+  endereco text not null, cidade text not null, estado text not null,
+  latitude double precision not null, longitude double precision not null,
+  created_at timestamptz not null default now()
+);
+alter table public.manual_delivery_addresses enable row level security;
+create policy manual_addresses_select on public.manual_delivery_addresses for select to authenticated using (true);
+create policy manual_addresses_insert on public.manual_delivery_addresses for insert to authenticated
+  with check ((select auth.uid()) = motoboy_id);
+create policy manual_addresses_update on public.manual_delivery_addresses for update to authenticated
+  using ((select auth.uid()) = motoboy_id or exists (select 1 from public.profiles p where p.id = (select auth.uid())
+    and (p.roles @> array['admin'] or p.roles @> array['gestor'])));
 `
 
 export type Db = PGlite

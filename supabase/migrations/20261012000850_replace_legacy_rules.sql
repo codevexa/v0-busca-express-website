@@ -172,6 +172,7 @@ begin
   if to_regclass('public.manual_delivery_addresses') is not null then
     drop policy if exists manual_addresses_select on public.manual_delivery_addresses;
     create policy manual_addresses_select on public.manual_delivery_addresses for select to authenticated
-      using (exists (select 1 from public.profiles p where p.id = motoboy_id and p.company_id = app.company_id()));
+      using (exists (select 1 from public.profiles p
+                      where p.id = manual_delivery_addresses.motoboy_id and p.company_id = app.company_id()));
   end if;
 end $$;

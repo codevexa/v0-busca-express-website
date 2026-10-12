@@ -69,29 +69,21 @@ Faltam `ANTHROPIC_API_KEY`, `NOMINATIM_EMAIL` e `CRON_SECRET`.
 As migrations ficam em [`supabase/migrations`](supabase/migrations) e são idempotentes: funcionam num projeto novo
 e no banco existente da versão anterior, sem apagar dados.
 
-**Projeto em uso:** `supabase-fuchsia-window` (`rbfbzjesdjynbzpfgnwv`). Situação em 12/10/2026:
+**Projeto em uso:** `supabase-fuchsia-window` (`rbfbzjesdjynbzpfgnwv`). Em 12/10/2026 todas as migrations estão
+aplicadas: 0001 a 0006, 0008, 0009, 0910, 0920 e 0930 pelo conector do Supabase; 0007 e 0850 pelo SQL Editor.
 
-| Migration | Situação |
-| --- | --- |
-| 0001 baseline, 0002 identidade/permissões, 0003 operações, 0004 pagamentos, 0005 fotos/conferência, 0006 notificações, 0008 RLS, 0009 funções, 0910 identidade pública, 0920 endurecimento de permissões | ✅ aplicadas |
-| **0007 fechamentos** e **0850 substituição das regras antigas** | ⚠️ **pendentes**: precisam de aprovação manual |
+As migrations 0007 e 0850 contêm comandos `DROP`/`DELETE`, e o conector do Supabase exige confirmação humana para
+executá-los. Por isso existe [`supabase/manual/aplicar_no_sql_editor.sql`](supabase/manual/aplicar_no_sql_editor.sql),
+que junta as duas para colar no SQL Editor:
 
-As duas pendentes contêm comandos `DROP`/`DELETE`, e o conector do Supabase exige confirmação humana para executá-los.
-Para aplicar:
-
-1. No GitHub, abra [`supabase/manual/aplicar_no_sql_editor.sql`](supabase/manual/aplicar_no_sql_editor.sql) e use o botão
-   **Copy raw file** (ou **Raw** → selecionar tudo → copiar). Não copie de uma prévia formatada: ela pode trocar `--` por
-   travessão e aspas retas por aspas curvas, e o banco recusa o SQL (erro `operator too long` ou `syntax error`).
+1. No GitHub, abra o arquivo e use o botão **Copy raw file** (ou **Raw** → selecionar tudo → copiar). Não copie de uma
+   prévia formatada: ela pode trocar `--` por travessão e aspas retas por aspas curvas, e o banco recusa o SQL
+   (erro `operator too long` ou `syntax error`).
 2. Abra **Supabase → SQL Editor → New query**, cole e clique em **Run**. Confirme o aviso de operação destrutiva.
 
 O arquivo é gerado por `node scripts/gerar-sql-manual.mjs` a partir das duas migrations, sem comentários. Ele roda numa
 transação única (ou aplica tudo, ou nada) e pode ser executado de novo sem erro. O teste `tests/db/manual-sql.test.ts`
-confere que ele está em dia com as migrations e que aplica sobre o estado atual da produção. Enquanto ele não for aplicado:
-
-- os fechamentos quinzenais ficam indisponíveis;
-- as funções Gestor/Administrativo/Motoboy ainda não recebem as permissões padrão novas (o Administrador já tem acesso total;
-  o motoboy só consegue usar "Minhas entregas" depois desta etapa);
-- as políticas antigas de `profiles`/`companies`/áreas/notificações, que não isolam empresas, continuam ativas.
+confere que ele está em dia com as migrations e que aplica sobre um banco com todas as outras migrations.
 
 **Projeto novo:** aplique todos os arquivos de `supabase/migrations` em ordem (`supabase db push` ou SQL Editor).
 Depois crie o primeiro administrador:
