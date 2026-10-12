@@ -1,0 +1,21 @@
+# dependências
+node_modules/
+
+# Next.js
+.next/
+out/
+next-env.d.ts
+*.tsbuildinfo
+
+# ambiente (nunca versionar segredos)
+.env
+.env.*
+!.env.example
+
+# Vercel
+.vercel
+
+# sistema
+.DS_Store
+npm-debug.log*
+pnpm-debug.log*

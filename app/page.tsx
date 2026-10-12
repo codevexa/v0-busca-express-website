@@ -36,6 +36,9 @@ export default function Home() {
             <Button size="sm" className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
               Seja um Cooperado
             </Button>
+            <Button size="sm" variant="outline" asChild>
+              <a href="/app">Acessar sistema</a>
+            </Button>
           </nav>
         </div>
       </header>
