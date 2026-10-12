@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server"
 import { homeFor } from "@/lib/permissions"
 import { clientIp, rateLimit } from "@/lib/rate-limit"
-import { getServerSupabase } from "@/lib/supabase/server"
+import { AdminUnavailableError, getAdminSupabase, getServerSupabase } from "@/lib/supabase/server"
 import { loginSchema } from "@/lib/validation/auth"
 import type { SessionContext } from "@/lib/domain"
 
@@ -29,8 +29,18 @@ export async function POST(request: NextRequest) {
     )
   }
 
+  // A tradução matrícula → e-mail do Auth roda só no servidor (service_role).
+  let admin
+  try {
+    admin = getAdminSupabase()
+  } catch (error) {
+    if (error instanceof AdminUnavailableError) {
+      return NextResponse.json({ error: "Login indisponível: servidor sem SUPABASE_SERVICE_ROLE_KEY configurada." }, { status: 503 })
+    }
+    throw error
+  }
+  const { data: email, error: lookupError } = await admin.rpc("resolve_login_email", { p_matricula: matricula })
   const supabase = await getServerSupabase()
-  const { data: email, error: lookupError } = await supabase.rpc("resolve_login_email", { p_matricula: matricula })
   if (lookupError) {
     return NextResponse.json({ error: "Serviço de autenticação indisponível. Tente novamente." }, { status: 503 })
   }

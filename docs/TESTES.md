@@ -3,7 +3,7 @@
 ## Como executar
 
 ```bash
-pnpm test        # 57 testes: unitários + banco
+pnpm test        # 58 testes: unitários + banco
 pnpm typecheck
 pnpm build
 ```
@@ -18,12 +18,13 @@ pnpm build
 | Suíte | Resultado |
 | --- | --- |
 | `tests/db/smoke.test.ts` | 1/1 ✅ |
-| `tests/db/business.test.ts` | 36/36 ✅ |
+| `tests/db/business.test.ts` | 37/37 ✅ |
 | `tests/unit/*` | 20/20 ✅ |
 | `tsc --noEmit` | sem erros |
 | `next build` | ✅ (todas as rotas) |
 | Servidor de produção local | redirecionamentos, login, manifest, ícones, service worker, 401 em APIs sem sessão ✅ |
 | Tela de login (Chromium, 390 px e 1280 px) | digitar a matrícula mantém o foco no campo ✅ |
+| Produção (Supabase, transação desfeita) | admin: contexto, 44 permissões, painel e alertas ✅ · motoboy: só o próprio perfil e as próprias entregas ✅ |
 
 ## Checklist dos 24 cenários obrigatórios
 

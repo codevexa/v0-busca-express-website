@@ -44,13 +44,17 @@ beforeAll(async () => {
 
 describe("autenticação e permissões", () => {
   test("login por matrícula resolve o e-mail interno (sem diferenciar maiúsculas)", async () => {
-    const rows = await asUser<{ email: string }>(db, null, `select public.resolve_login_email('adm1') as email`)
+    const rows = await asAdmin<{ email: string }>(db, `select public.resolve_login_email('adm1') as email`)
     expect(rows[0].email).toBe("ADM1@ossala.internal")
+  })
+
+  test("anônimo não consegue consultar o e-mail de uma matrícula", async () => {
+    await expectError(asUser(db, null, `select public.resolve_login_email('adm1')`), /permission denied/)
   })
 
   test("usuário inativo não resolve login", async () => {
     await asAdmin(db, `update public.profiles set ativo = false where id = $1`, [MOTO2])
-    const rows = await asUser<{ email: string | null }>(db, null, `select public.resolve_login_email('402') as email`)
+    const rows = await asAdmin<{ email: string | null }>(db, `select public.resolve_login_email('402') as email`)
     expect(rows[0].email).toBeNull()
     await asAdmin(db, `update public.profiles set ativo = true where id = $1`, [MOTO2])
   })

@@ -54,7 +54,7 @@ Todas estão documentadas em [`.env.example`](.env.example).
 | --- | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | sim | URL do projeto Supabase |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (ou `NEXT_PUBLIC_SUPABASE_ANON_KEY`) | sim | chave pública (RLS aplicada) |
-| `SUPABASE_SERVICE_ROLE_KEY` (ou `SUPABASE_SECRET_KEY`) | para administrar usuários | criar usuários, redefinir senhas, revogar sessões, cron de retenção. **Somente servidor.** |
+| `SUPABASE_SERVICE_ROLE_KEY` (ou `SUPABASE_SECRET_KEY`) | sim | login (tradução matrícula → conta, feita só no servidor), criar usuários, redefinir senhas, revogar sessões, cron de retenção. **Somente servidor.** |
 | `ANTHROPIC_API_KEY` | para o OCR | leitura das comandas fotografadas. Sem ela, a conferência é manual |
 | `NOMINATIM_EMAIL` | recomendada | identificação exigida pela política do Nominatim |
 | `CRON_SECRET` | para a retenção de fotos | autentica o Vercel Cron em `/api/cron/retencao` |
@@ -73,7 +73,7 @@ e no banco existente da versão anterior, sem apagar dados.
 
 | Migration | Situação |
 | --- | --- |
-| 0001 baseline, 0002 identidade/permissões, 0003 operações, 0004 pagamentos, 0005 fotos/conferência, 0006 notificações, 0008 RLS, 0009 funções, 0910 identidade pública | ✅ aplicadas |
+| 0001 baseline, 0002 identidade/permissões, 0003 operações, 0004 pagamentos, 0005 fotos/conferência, 0006 notificações, 0008 RLS, 0009 funções, 0910 identidade pública, 0920 endurecimento de permissões | ✅ aplicadas |
 | **0007 fechamentos** e **0850 substituição das regras antigas** | ⚠️ **pendentes**: precisam de aprovação manual |
 
 As duas pendentes contêm comandos `DROP`/`DELETE`, e o conector do Supabase exige confirmação humana para executá-los.
@@ -85,7 +85,8 @@ Para aplicar:
 O arquivo roda numa transação única: ou aplica tudo, ou nada. Enquanto ele não for aplicado:
 
 - os fechamentos quinzenais ficam indisponíveis;
-- as funções Gestor/Administrativo/Motoboy ainda não recebem as permissões padrão novas (o Administrador já tem acesso total);
+- as funções Gestor/Administrativo/Motoboy ainda não recebem as permissões padrão novas (o Administrador já tem acesso total;
+  o motoboy só consegue usar "Minhas entregas" depois desta etapa);
 - as políticas antigas de `profiles`/`companies`/áreas/notificações, que não isolam empresas, continuam ativas.
 
 **Projeto novo:** aplique todos os arquivos de `supabase/migrations` em ordem (`supabase db push` ou SQL Editor).
@@ -100,6 +101,8 @@ Depois crie o primeiro administrador:
     where u.email = 'admin@ossala.internal' and c.slug = 'empresa-principal';
    ```
 3. Entre em `/app/login` com a matrícula `ADMIN`. Os demais usuários são criados pela tela **Usuários**.
+
+Recomendado: em **Authentication → Providers → Email**, ative a proteção contra senhas vazadas (Leaked Password Protection).
 
 ## Implantação na Vercel
 
