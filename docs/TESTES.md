@@ -3,7 +3,7 @@
 ## Como executar
 
 ```bash
-pnpm test        # 58 testes: unitários + banco
+pnpm test        # 60 testes: unitários + banco
 pnpm typecheck
 pnpm build
 ```
@@ -19,6 +19,7 @@ pnpm build
 | --- | --- |
 | `tests/db/smoke.test.ts` | 1/1 ✅ |
 | `tests/db/business.test.ts` | 37/37 ✅ |
+| `tests/db/manual-sql.test.ts` (arquivo do SQL Editor sobre o estado da produção, executado duas vezes) | 2/2 ✅ |
 | `tests/unit/*` | 20/20 ✅ |
 | `tsc --noEmit` | sem erros |
 | `next build` | ✅ (todas as rotas) |

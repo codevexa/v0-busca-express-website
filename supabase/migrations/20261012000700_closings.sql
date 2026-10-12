@@ -1,6 +1,14 @@
 -- OSSALA | 0007 - Fechamento quinzenal e bloqueio de períodos encerrados.
 
-create extension if not exists btree_gist;
+-- No Supabase as extensões ficam no schema "extensions" (fora do schema público).
+do $$
+begin
+  if to_regnamespace('extensions') is not null then
+    create extension if not exists btree_gist with schema extensions;
+  else
+    create extension if not exists btree_gist;
+  end if;
+end $$;
 
 create table if not exists public.closing_periods (
   id uuid primary key default gen_random_uuid(),
@@ -481,9 +489,16 @@ create or replace trigger audit_closing_periods after insert or update or delete
   for each row execute function app.audit_row();
 
 -- RLS: leitura para quem tem fechamentos.visualizar; escrita somente pelas funções acima.
-create policy closing_periods_select on public.closing_periods for select to authenticated
-  using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
-create policy closing_items_select on public.closing_items for select to authenticated
-  using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and policyname = 'closing_periods_select') then
+    create policy closing_periods_select on public.closing_periods for select to authenticated
+      using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and policyname = 'closing_items_select') then
+    create policy closing_items_select on public.closing_items for select to authenticated
+      using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
+  end if;
+end $$;
 revoke all on public.closing_periods, public.closing_items from anon;
 revoke insert, update, delete on public.closing_periods, public.closing_items from authenticated;

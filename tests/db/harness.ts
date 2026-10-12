@@ -50,6 +50,8 @@ create function storage.foldername(name text) returns text[] language sql immuta
 $f$;
 grant execute on function storage.foldername(text) to authenticated;
 
+create schema if not exists extensions;
+
 create publication supabase_realtime;
 `
 
@@ -76,13 +78,19 @@ alter table public.delivery_areas add constraint delivery_areas_name_check
 
 export type Db = PGlite
 
-export async function createDb(): Promise<Db> {
+/**
+ * Cria o banco aplicando as migrations em ordem. `skip` deixa migrations de fora
+ * para reproduzir um banco parcialmente migrado (ex.: o estado atual da produção).
+ */
+export async function createDb(options: { skip?: string[] } = {}): Promise<Db> {
   const db = await PGlite.create({ extensions: { pgcrypto, btree_gist } })
   await db.exec(SUPABASE_STUB)
   await db.exec(LEGACY_FIXTURE)
 
   const dir = join(process.cwd(), "supabase", "migrations")
-  const files = readdirSync(dir).filter((f) => f.endsWith(".sql")).sort()
+  const files = readdirSync(dir)
+    .filter((f) => f.endsWith(".sql") && !options.skip?.includes(f))
+    .sort()
   for (const file of files) {
     const sql = readFileSync(join(dir, file), "utf8")
     try {

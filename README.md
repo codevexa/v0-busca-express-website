@@ -79,10 +79,14 @@ e no banco existente da versão anterior, sem apagar dados.
 As duas pendentes contêm comandos `DROP`/`DELETE`, e o conector do Supabase exige confirmação humana para executá-los.
 Para aplicar:
 
-1. Abra **Supabase → SQL Editor → New query**.
-2. Cole o conteúdo de [`supabase/manual/aplicar_no_sql_editor.sql`](supabase/manual/aplicar_no_sql_editor.sql) e clique em **Run**.
+1. No GitHub, abra [`supabase/manual/aplicar_no_sql_editor.sql`](supabase/manual/aplicar_no_sql_editor.sql) e use o botão
+   **Copy raw file** (ou **Raw** → selecionar tudo → copiar). Não copie de uma prévia formatada: ela pode trocar `--` por
+   travessão e aspas retas por aspas curvas, e o banco recusa o SQL (erro `operator too long` ou `syntax error`).
+2. Abra **Supabase → SQL Editor → New query**, cole e clique em **Run**. Confirme o aviso de operação destrutiva.
 
-O arquivo roda numa transação única: ou aplica tudo, ou nada. Enquanto ele não for aplicado:
+O arquivo é gerado por `node scripts/gerar-sql-manual.mjs` a partir das duas migrations, sem comentários. Ele roda numa
+transação única (ou aplica tudo, ou nada) e pode ser executado de novo sem erro. O teste `tests/db/manual-sql.test.ts`
+confere que ele está em dia com as migrations e que aplica sobre o estado atual da produção. Enquanto ele não for aplicado:
 
 - os fechamentos quinzenais ficam indisponíveis;
 - as funções Gestor/Administrativo/Motoboy ainda não recebem as permissões padrão novas (o Administrador já tem acesso total;

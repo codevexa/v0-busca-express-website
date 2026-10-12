@@ -1,14 +1,13 @@
--- ============================================================================
--- OSSALA | Migrations que exigem execução manual no SQL Editor do Supabase
--- Contém, nesta ordem: 20261012000700_closings.sql e 20261012000850_replace_legacy_rules.sql
--- Execute o arquivo inteiro de uma vez (Run). É seguro executar mais de uma vez.
--- ============================================================================
-
 begin;
 
--- OSSALA | 0007 - Fechamento quinzenal e bloqueio de períodos encerrados.
-
-create extension if not exists btree_gist;
+do $$
+begin
+  if to_regnamespace('extensions') is not null then
+    create extension if not exists btree_gist with schema extensions;
+  else
+    create extension if not exists btree_gist;
+  end if;
+end $$;
 
 create table if not exists public.closing_periods (
   id uuid primary key default gen_random_uuid(),
@@ -76,10 +75,6 @@ create table if not exists public.closing_items (
 create index if not exists closing_items_closing_idx on public.closing_items (closing_id);
 alter table public.closing_items enable row level security;
 
--- ---------------------------------------------------------------------------
--- Bloqueio de períodos encerrados
--- ---------------------------------------------------------------------------
-
 create or replace function app.closed_period_for(p_company uuid, p_date date)
 returns uuid
 language sql
@@ -104,7 +99,6 @@ declare
   v_dates date[];
   v_date date;
 begin
-  -- Colunas mantidas pelo sistema (pagamento, conferência, totais) não são bloqueadas.
   if current_setting('app.internal_write', true) = 'on' then
     return coalesce(new, old);
   end if;
@@ -118,7 +112,7 @@ begin
       case when tg_op in ('UPDATE', 'DELETE') then old.delivery_date end,
       case when tg_op in ('INSERT', 'UPDATE') then new.delivery_date end
     ], null);
-  else -- delivery_extras
+  else
     select d.company_id, array[d.delivery_date] into v_company, v_dates
       from public.deliveries d where d.id = coalesce(new.delivery_id, old.delivery_id);
   end if;
@@ -138,11 +132,6 @@ create or replace trigger deliveries_period_lock before insert or update or dele
 create or replace trigger delivery_extras_period_lock before insert or update or delete on public.delivery_extras
   for each row execute function app.assert_period_open();
 
--- ---------------------------------------------------------------------------
--- Consolidação
--- ---------------------------------------------------------------------------
-
--- Impressão digital dos dados de origem: detecta alterações após a consolidação.
 create or replace function app.closing_fingerprint(p_company uuid, p_start date, p_end date)
 returns text
 language sql
@@ -406,7 +395,6 @@ begin
 end;
 $$;
 
--- Correção pontual de uma entrega em período encerrado (com justificativa).
 create or replace function public.correct_closed_delivery(p_delivery_id uuid, p_changes jsonb, p_reason text)
 returns public.deliveries
 language plpgsql
@@ -462,7 +450,6 @@ begin
 
   perform set_config('app.closing_override', 'off', true);
 
-  -- Atualiza o retrato do fechamento e registra a correção.
   perform app.closing_build(v_closing);
   update public.closing_periods
      set corrections = corrections || jsonb_build_array(jsonb_build_object(
@@ -488,27 +475,20 @@ grant execute on function public.correct_closed_delivery(uuid, jsonb, text) to a
 create or replace trigger audit_closing_periods after insert or update or delete on public.closing_periods
   for each row execute function app.audit_row();
 
--- RLS: leitura para quem tem fechamentos.visualizar; escrita somente pelas funções acima.
-create policy closing_periods_select on public.closing_periods for select to authenticated
-  using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
-create policy closing_items_select on public.closing_items for select to authenticated
-  using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
+do $$
+begin
+  if not exists (select 1 from pg_policies where schemaname = 'public' and policyname = 'closing_periods_select') then
+    create policy closing_periods_select on public.closing_periods for select to authenticated
+      using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
+  end if;
+  if not exists (select 1 from pg_policies where schemaname = 'public' and policyname = 'closing_items_select') then
+    create policy closing_items_select on public.closing_items for select to authenticated
+      using (company_id = app.company_id() and app.has_perm('fechamentos.visualizar'));
+  end if;
+end $$;
 revoke all on public.closing_periods, public.closing_items from anon;
 revoke insert, update, delete on public.closing_periods, public.closing_items from authenticated;
 
--- OSSALA | 0850 - Substituição das regras da versão anterior.
---
--- Esta é a ÚNICA migration com comandos destrutivos (DROP/DELETE). Ela não
--- apaga dados operacionais: remove políticas RLS, gatilhos e restrições da
--- versão anterior que conflitam com o novo modelo de segurança e as substitui.
---
---  * As políticas antigas de profiles/companies/áreas/notificações usavam
---    funções globais (is_staff/is_admin) que não isolam empresas.
---  * role_permissions/user_permissions passam a referenciar public.permissions.
---  * A permissão "entregas.criar" deixa de ser padrão do papel MOTOBOY.
---  * A restrição que limitava áreas a 4 nomes fixos é removida.
-
--- 1. Catálogo único de permissões -------------------------------------------
 alter table public.role_permissions drop constraint if exists role_permissions_permission_key_fkey;
 alter table public.user_permissions drop constraint if exists user_permissions_permission_key_fkey;
 
@@ -519,7 +499,6 @@ alter table public.user_permissions
   add constraint user_permissions_permission_key_fkey
   foreign key (permission_key) references public.permissions(key) on delete cascade;
 
--- Permissões padrão de cada papel (ADMIN sempre tem acesso total).
 insert into public.role_permissions (role, permission_key)
 select r.role, p.key
   from (values
@@ -547,20 +526,13 @@ select r.role, p.key
   join public.permissions p on p.key = k.key
 on conflict do nothing;
 
--- Na versão anterior o MOTOBOY podia cadastrar entregas; no novo modelo isso é
--- função da operação. A permissão pode ser concedida individualmente se necessário.
 delete from public.role_permissions where role = 'MOTOBOY' and permission_key = 'entregas.criar';
 
--- 2. Gatilhos legados substituídos -------------------------------------------
--- protect_profile_role_changes -> app.protect_profile_fields (0002)
 drop trigger if exists protect_profile_role_changes on public.profiles;
--- set_notifications_company exigia sessão e sobrescrevia company_id -> app.notifications_fill_company (0006)
 drop trigger if exists set_notifications_company on public.notifications;
 
--- 3. Áreas adicionais -----------------------------------------------------------
 alter table public.delivery_areas drop constraint if exists delivery_areas_name_check;
 
--- 4. Políticas RLS das tabelas reaproveitadas ---------------------------------
 drop policy if exists profiles_select on public.profiles;
 drop policy if exists profiles_insert on public.profiles;
 drop policy if exists profiles_update on public.profiles;
@@ -662,9 +634,6 @@ create policy notifications_update_own on public.notifications for update to aut
   using (recipient_id = (select auth.uid()))
   with check (recipient_id = (select auth.uid()));
 
--- ---------------------------------------------------------------------------
--- Correção de vazamento entre empresas em tabela legada
--- ---------------------------------------------------------------------------
 do $$
 begin
   if to_regclass('public.manual_delivery_addresses') is not null then
@@ -675,3 +644,4 @@ begin
 end $$;
 
 commit;
+
