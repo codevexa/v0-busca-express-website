@@ -1,6 +1,6 @@
 # OSSALA | Vídeo demonstrativo
 
-Projeto que gera o vídeo de apresentação do **OSSALA | Controle de Entregas**: MP4 de 1920 × 1080, 30 FPS e cerca de 60 s.
+Projeto que gera o vídeo de apresentação do **OSSALA | Controle de Entregas**: MP4 de 1920 × 1080, 30 FPS e cerca de 60 s, com narração em português.
 O vídeo é produzido com [Remotion](https://www.remotion.dev) (vídeo programático em React) a partir dos **componentes,
 estilos e regras reais do aplicativo**. Nenhum arquivo do app foi alterado para isso; a única mudança fora desta pasta
 foi excluir `video/` do `tsconfig.json` da raiz.
@@ -34,8 +34,34 @@ O Remotion baixa o próprio Chromium na primeira execução. Para usar um navega
 `REMOTION_BROWSER_EXECUTABLE=/caminho/do/chrome`. `REMOTION_CONCURRENCY=4` controla quantos quadros são renderizados
 em paralelo. O script de renderização inicia o navegador em pt-BR, para que datas e valores saiam no padrão brasileiro.
 
-**Trilha sonora (opcional):** coloque um arquivo `public/trilha.mp3` com licença de uso e renderize de novo. Ele entra
-automaticamente, com fade-in. Sem o arquivo, o vídeo sai sem áudio.
+## Narração
+
+A narração em pt-BR é uma **voz sintética** gerada localmente com o modelo aberto
+[Kokoro](https://github.com/thewh1teagle/kokoro-onnx) (licença Apache 2.0). O texto e o momento de cada fala ficam em
+`narracao/roteiro.json`. Os áudios prontos, com a voz feminina `pf_dora`, já estão em `public/narracao/` e entram
+automaticamente no `npm run render`.
+
+Para mudar o texto ou a voz (`pf_dora` feminina, `pm_alex` ou `pm_santa` masculinas):
+
+```bash
+python -m venv .venv && .venv/bin/pip install kokoro-onnx soundfile
+# baixe kokoro-v1.0.onnx e voices-v1.0.bin de
+# https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0 para narracao/modelos/
+.venv/bin/python scripts/narrar.py --voz pm_alex   # grava public/narracao/*.wav
+```
+
+O script acelera uma fala (até 1,25x) se ela passar do tempo da cena. Com ffmpeg instalado, ele também aplica
+compressão e loudness de −16 LUFS. Para trocar só o áudio de um vídeo já renderizado, sem renderizar os quadros de novo:
+
+```bash
+python scripts/mixar.py out/ossala-demo.mp4 out/ossala-demo-narrado.mp4
+```
+
+Para uma **locução profissional**, grave cada fala do roteiro, salve como `public/narracao/<id>.wav` (por exemplo,
+`03-entregas.wav`) e renderize de novo. Os tempos de início vêm do `roteiro.json`.
+
+**Trilha sonora (opcional):** coloque um arquivo `public/trilha.mp3` com licença de uso e renderize de novo. Ela entra
+automaticamente, com fade-in, e fica em volume baixo quando há narração.
 
 ## Roteiro (≈ 60 s)
 

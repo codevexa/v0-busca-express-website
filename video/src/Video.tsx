@@ -1,7 +1,8 @@
 import { linearTiming, TransitionSeries } from "@remotion/transitions"
 import { fade } from "@remotion/transitions/fade"
 import { useEffect, useState } from "react"
-import { AbsoluteFill, Audio, continueRender, delayRender, staticFile, getStaticFiles } from "remotion"
+import { AbsoluteFill, Audio, continueRender, delayRender, getStaticFiles, Sequence, staticFile } from "remotion"
+import roteiro from "../narracao/roteiro.json"
 import { easeInOut } from "./lib/anim"
 import { Intro } from "./scenes/Intro"
 import { MapScene } from "./scenes/MapScene"
@@ -25,8 +26,13 @@ function useFonts() {
   }, [handle])
 }
 
+const files = new Set(getStaticFiles().map((f) => f.name))
+
 /** Trilha opcional: coloque um arquivo em public/trilha.mp3 para incluí-la no vídeo. */
-const music = getStaticFiles().find((f) => f.name === "trilha.mp3")
+const music = files.has("trilha.mp3")
+
+/** Narração gerada por scripts/narrar.py (public/narracao/<id>.wav), posicionada pelo roteiro. */
+const narration = roteiro.falas.filter((f) => files.has(`narracao/${f.id}.wav`))
 
 export function OssalaDemo() {
   useFonts()
@@ -62,7 +68,13 @@ export function OssalaDemo() {
             <Outro duration={SCENES.outro} />
           </TransitionSeries.Sequence>
         </TransitionSeries>
-        {music && <Audio src={staticFile(music.name)} volume={(f) => Math.min(1, f / 30) * 0.6} />}
+        {narration.map((f) => (
+          <Sequence key={f.id} from={Math.round(f.inicio * 30)} layout="none">
+            <Audio src={staticFile(`narracao/${f.id}.wav`)} />
+          </Sequence>
+        ))}
+        {/* Com narração, a trilha fica baixa para não competir com a voz. */}
+        {music && <Audio src={staticFile("trilha.mp3")} volume={(f) => Math.min(1, f / 30) * (narration.length ? 0.15 : 0.6)} />}
       </AbsoluteFill>
     </DemoSession>
   )

@@ -1,0 +1,12 @@
+{
+  "voz": "pf_dora",
+  "falas": [
+    { "id": "01-abertura", "inicio": 0.7, "max": 3.6, "texto": "Ossala. Gestão inteligente. Entregas sob controle." },
+    { "id": "02-painel", "inicio": 5.2, "max": 6.4, "texto": "Em um único painel, você acompanha as entregas do dia, os status, as divergências e os valores, em tempo real." },
+    { "id": "03-entregas", "inicio": 12.4, "max": 11.0, "texto": "Cadastre a comanda e localize o endereço: a área e os valores são definidos pelo bairro. Escolha o motoboy, salve, e acompanhe cada entrega até a conclusão." },
+    { "id": "04-mapa", "inicio": 24.4, "max": 8.4, "texto": "No mapa, cada entrega aparece no seu lugar, com cores por status, e o filtro separa as regiões por área de cobrança." },
+    { "id": "05-conferencia", "inicio": 33.3, "max": 10.2, "texto": "Na conferência, a foto da comanda é lida automaticamente e comparada com o cadastro. As diferenças ficam destacadas, e a aprovação é sempre de uma pessoa." },
+    { "id": "06-permissoes", "inicio": 44.3, "max": 8.6, "texto": "Cada usuário vê apenas o que precisa: permissões por função, ajustes individuais e verificação também no servidor e no banco de dados." },
+    { "id": "07-encerramento", "inicio": 54.6, "max": 4.6, "texto": "Ossala. Gestão inteligente, entregas sob controle." }
+  ]
+}
