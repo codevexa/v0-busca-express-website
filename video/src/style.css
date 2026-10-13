@@ -1,0 +1,32 @@
+/* Identidade visual e tokens do aplicativo, sem cópia: o mesmo arquivo usado em /app. */
+@import "../../app/globals.css";
+
+/* Tailwind precisa enxergar as classes dos componentes reais e das cenas do vídeo. */
+@source "../../components";
+@source "../../lib";
+@source "./";
+
+@font-face {
+  font-family: "Geist";
+  src: url("../node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: block;
+}
+@font-face {
+  font-family: "Geist Mono";
+  src: url("../node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-display: block;
+}
+
+html,
+body {
+  margin: 0;
+  background: #0b0b0b;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-sans,
+body {
+  font-family: "Geist", ui-sans-serif, system-ui, sans-serif;
+}
