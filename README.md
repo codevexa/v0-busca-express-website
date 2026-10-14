@@ -62,7 +62,7 @@ Todas estão documentadas em [`.env.example`](.env.example).
 | `NEXT_PUBLIC_COMPANY_SLUG` | não | empresa exibida no login (padrão `empresa-principal`) |
 
 O projeto Vercel `v0-sistema-de-entregas-ossala` já tem as variáveis do Supabase (integração Vercel ↔ Supabase).
-Faltam `ANTHROPIC_API_KEY`, `NOMINATIM_EMAIL` e `CRON_SECRET`.
+Faltam `ANTHROPIC_API_KEY` (OCR) e `NOMINATIM_EMAIL`.
 
 ## Configurar o Supabase
 
@@ -101,6 +101,21 @@ Depois crie o primeiro administrador:
 Recomendado: em **Authentication → Providers → Email**, ative a proteção contra senhas vazadas (Leaked Password Protection).
 
 ## Implantação na Vercel
+
+**Produção atual:** https://v0-sistema-de-entregas-ossala.vercel.app/app, no projeto Vercel `v0-sistema-de-entregas-ossala`,
+que já tem as variáveis do Supabase (integração Vercel ↔ Supabase), `CRON_SECRET` e `NEXT_PUBLIC_APP_URL`. A proteção de
+acesso é a padrão: produção aberta (o sistema tem login próprio) e pré-visualizações exigem login na Vercel.
+
+Esse projeto ainda está ligado ao repositório antigo (`codevexa/sistema-de-entregas-ossala`). A produção foi publicada
+a partir deste repositório pela API. Até religar o Git em **Settings → Git** para `codevexa/v0-busca-express-website`:
+
+- um merge na `main` do repositório antigo substitui a produção pelo app antigo;
+- um push na `main` deste repositório não publica sozinho nesse projeto.
+
+O Next.js precisa estar numa versão sem vulnerabilidades conhecidas. A Vercel bloqueia o deploy com
+"Vulnerable version of Next.js detected" quando não está.
+
+Para um projeto novo:
 
 1. Importe este repositório na Vercel (Framework: Next.js), ou conecte-o ao projeto existente.
 2. Configure as variáveis de ambiente da tabela acima (Production e Preview).
