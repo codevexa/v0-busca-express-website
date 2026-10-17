@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext } from "react"
+import { createContext, useCallback, useContext } from "react"
 import type { AppSettings, SessionContext } from "@/lib/domain"
 import { can } from "@/lib/permissions"
 
@@ -22,7 +22,12 @@ export function useSession() {
   return ctx
 }
 
+/**
+ * Função de checagem de permissão com identidade estável enquanto a sessão
+ * não muda. Ela entra em dependências de useCallback/useEffect; uma função
+ * nova a cada renderização faria as telas recarregarem em laço.
+ */
 export function useCan() {
   const { session } = useSession()
-  return (key: string) => can(session, key)
+  return useCallback((key: string) => can(session, key), [session])
 }
