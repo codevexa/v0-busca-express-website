@@ -55,7 +55,10 @@ export function useCatalog() {
     load()
   }, [load])
 
-  return { ...catalog, loading, error, reload: () => load(true) }
+  // Identidade estável: usado em dependências de efeitos (ex.: tela Áreas).
+  const reload = useCallback(() => load(true), [load])
+
+  return { ...catalog, loading, error, reload }
 }
 
 export function invalidateCatalog() {
